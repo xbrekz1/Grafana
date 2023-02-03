@@ -12,12 +12,16 @@
 
 Установим необходимые пакеты
 
+---
+
 sudo apt update
 sudo apt install \
     ca-certificates \
     curl \
     gnupg \
     lsb-release
+---
+
 Добави GPG ключ Docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 Добавим стабильный репозиторий Docker
