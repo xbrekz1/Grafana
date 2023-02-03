@@ -1,9 +1,7 @@
 # Grafana
 Установка Grafana и Prometheus
 
-
-
-
+---
 
 В данной инструкции мы разберемся с вами правильно установить и настроить одну из самых популярных система мониторинга Grafana + Prometheus. Установку мы буде производить в Docker. В статье мы подробно рассмотрим все этапы установки, а в самом конце вы найдете готовый compose файл для быстрой установки.
 
@@ -20,7 +18,7 @@ sudo apt install \
     curl \
     gnupg \
     lsb-release
----
+
 
 Добави GPG ключ Docker
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
