@@ -9,7 +9,6 @@
 Вы можете установить докер в ручную либо заказать уже готовый виртуальный сервер с Docker и Portainer у нас на сайте
 
 Установим необходимые пакеты
-
 ---
 
 sudo apt update
@@ -20,38 +19,54 @@ sudo apt install \
     lsb-release
 
 
-Добави GPG ключ Docker
+Добавим GPG ключ Docker
+---
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
 Добавим стабильный репозиторий Docker
+---
 
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
 Обновим пакеты и установим Docker
+---
 
 sudo apt update
 sudo apt install docker-ce docker-ce-cli containerd.io
+
 Для удобства управления контейнерами можно дополнительно установить Portainer. После установки вебинтерфейс Portainer будет доступен по адресу https://ip:9443
+---
 
 docker run -d -p 8000:8000 -p 9443:9443 --name portainer \
     --restart=always \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v portainer_data:/data \
     portainer/portainer-ce:latest
+
 Установим docker-compose
+---
 
 apt  install docker-compose
+
 На данном подготовку для установки Grafana + Portainer мы закончили.
+---
 
 Установка Grafana
+---
+
 Для установки последней стабильной вервии Grafana достаточно выполнить следующую команду
+---
 
 docker run -d -p 3000:3000 --name grafana grafana/grafana-enterprise
 
 После завершения установки веб интерфейс будет доступен по адресу http://ip:3000. Вам будет необходимо ввести логин admin и пароль admin, после чего вам будет предложено указать новый пароль.
+---
 
 Установка Prometheus + Node Exporter
 Установим Prometheus и для сбора статистики с хост системы(системы на которой установлен сервер Grafana) дополнительно установим Node Exporter.
+---
 
 Для упрощения установки мы создадим файл docker-compose.yml со следующим содержимым:
 
@@ -99,11 +114,15 @@ services:
       - 9090:9090
     networks:
       - monitoring
+
 Для сбора статистики Node Exporter мы смонтировали /proc /sys и / в режиме чтения.
+---
 
 Для Prometheus нам необходимо указать папку в которой будет располагаться файл конфигурации prometheus.yml. В примере выше путь указан к корневой папке с которой будет запущен compose файл.
+---
 
 Создадим директорию prometheus в которой создадим файл prometheus.yml со следующим содержимым:
+---
 
 global:
   scrape_interval:     15s
@@ -117,7 +136,9 @@ scrape_configs:
   - job_name: "node"
     static_configs:
     - targets: ["node-exporter:9100"]
+
 Вернемся на уровень выше, где находится файл docker-compose.yml и выполним установку
+---
 
 docker-compose up -d
 
@@ -148,57 +169,12 @@ docker-compose up -d
 После того как вы нажмете кнопку Import вы попадает в установленный дашборд в котором уже будут отображаться собранные данные.
 
 Для того чтобы установить установить всю связку необходимо создать файл docker-compose.yml в который необходимо добавить следующее
+---
 
-version: '3.3'
 
-networks:
-  monitoring:
-    driver: bridge
-    
-volumes:
-  prometheus_data: {}
 
-services:
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: node-exporter
-    restart: unless-stopped
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.rootfs=/rootfs'
-      - '--path.sysfs=/host/sys'
-      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    ports:
-      - 9100:9100
-    networks:
-      - monitoring
-  grafana:
-    image: grafana/grafana-enterprise
-    container_name: grafana
-    restart: unless-stopped
-    ports:
-      - 3000:3000
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    restart: unless-stopped
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
-      - '--web.enable-lifecycle'
-    ports:
-      - 9090:9090
-    networks:
-      - monitoring
+![gravaconfig](https://sun9-80.userapi.com/impg/wl2POMsIihuKGhum5C4-iOI_18p4uqprRVhdoQ/G6RjD6vF8-A.jpg?size=362x646&quality=96&sign=2b9737f04d9613d2a9febe49271da098&type=album)
+
 И выполнить команду:
-
+---
 docker-compose up -d
